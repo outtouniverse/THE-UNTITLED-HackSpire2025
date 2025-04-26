@@ -3,73 +3,71 @@ import React, { useState } from 'react';
 import UserInfo from './UserInfo';
 import Navbar from './Navbar';
 import CharacterCards from './CharacterCards';
-// import ChatCanvas from './ChatCanvas'; // Remove old import
-import VoiceChatInterface from './VoiceChatInterface'; // Import the new component
+import ChatCanvas from './ChatCanvas';
 import ChatHistory from './ChatHistory';
 import ChatDetail from './ChatDetail';
 
 export default function Emotion() {
-  // State to manage tabs: 'chat' or 'history'
   const [activeTab, setActiveTab] = useState('chat');
-  // State for selected character to open voice chat canvas
   const [selectedCharacter, setSelectedCharacter] = useState(null);
-  // State for selected chat ID to view chat detail (for text history)
   const [selectedChatId, setSelectedChatId] = useState(null);
 
-  // Function to handle character selection - opens the voice chat interface
   const handleSelectCharacter = (character) => {
     setSelectedCharacter(character);
   };
 
-  // Function to close the voice chat interface
-  const handleCloseChatInterface = () => {
+  const handleCloseChatCanvas = () => {
     setSelectedCharacter(null);
   };
 
-  // Function to select a chat from history (this will be text history)
   const handleSelectHistoryChat = (chatId) => {
     setSelectedChatId(chatId);
-    // Optionally switch to history tab here if not already there
-    // setActiveTab('history');
   };
 
-  // Function to go back from chat detail to history list
   const handleBackToHistory = () => {
     setSelectedChatId(null);
   };
 
-  // Determine content based on activeTab and states
   let content;
   if (activeTab === 'chat') {
-    // When 'chat' tab is active, show CharacterCards
-    content = <CharacterCards onSelect={handleSelectCharacter} />;
-  } else { // activeTab === 'history'
-    // When 'history' tab is active, show history list or detail
+    content = selectedCharacter ? null : <CharacterCards onSelect={handleSelectCharacter} />;
+  } else {
     content = selectedChatId ? (
       <ChatDetail chatId={selectedChatId} onBack={handleBackToHistory} />
-    ) : (
-      <ChatHistory onSelect={handleSelectHistoryChat} />
-    );
+    ) : 
+      <ChatHistory onSelect={handleSelectHistoryChat} />;
   }
 
   return (
-    <div className="app-container">
+    <div className="app-container" style={{
+      background: '#000',
+      fontFamily: "'Inter', sans-serif",
+      color: '#f5f5f5',
+      display: 'flex',
+      flexDirection: 'column',
+      flexGrow: 1,
+      width: '100vw',
+      padding: '0 16px',
+    }}>
       <UserInfo />
-
-      <div className="content-area"> {/* Area for tabs and dynamic content */}
+      <div className="content-area" style={{
+        maxWidth: 1100,
+        width: '100%',
+        margin: '0 auto',
+        padding: '32px 0',
+        position: 'relative',
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
         <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
-
-        {/* Render content based on tabs and selection */}
-        {content}
-
-        {/* Render VoiceChatInterface as an overlay if a character is selected */}
-        {selectedCharacter && (
-          <VoiceChatInterface
-            character={selectedCharacter}
-            onClose={handleCloseChatInterface}
-          />
-        )}
+        <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+           {content}
+        </div>
       </div>
+      {selectedCharacter && (
+        <ChatCanvas character={selectedCharacter} onClose={handleCloseChatCanvas} />
+      )}
     </div>
   );
 }

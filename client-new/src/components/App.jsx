@@ -4,43 +4,23 @@ import { useAuth, AuthProvider } from './context/AuthContext';
 import GoogleLoginButton from './GoogleLoginButton';
 import Home from './Home';
 import Emotion from './Emotion';
+import JournalView from './JournalView';
+import AnalysisView from './AnalysisView';
+import Garden from './Garden';
 
 function AppRoutes() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
-  // If not logged in, show login
-  if (!user) {
-    return <GoogleLoginButton />;
-  }
-
-  // If logged in, show the app with routes
   return (
-    <>
-      {/* Optional: Show user info and logout at the top */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-        padding: '16px 32px 0 0'
-      }}>
-        <span style={{ marginRight: 16, color: '#1976d2', fontWeight: 500 }}>
-          {user.displayName} ({user.email})
-        </span>
-        <button
-          onClick={logout}
-          style={{
-            background: '#e53935', color: '#fff', border: 'none', borderRadius: 6,
-            padding: '8px 18px', fontWeight: 500, cursor: 'pointer'
-          }}
-        >
-          Logout
-        </button>
-      </div>
-      <Routes>
-        <Route path="/" element={<Navigate to="/home" />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/mood" element={<Emotion />} />
-        <Route path="*" element={<Navigate to="/home" />} />
-      </Routes>
-    </>
+    <Routes>
+      <Route path="/" element={user ? <Navigate to="/home" /> : <GoogleLoginButton />} />
+      <Route path="/home" element={user ? <Home /> : <Navigate to="/" />} />
+      <Route path="/mood" element={user ? <Emotion /> : <Navigate to="/" />} />
+      <Route path="/journal" element={user ? <JournalView /> : <Navigate to="/" />} />
+      <Route path="/analysis" element={ <AnalysisView /> } />
+      <Route path="/garden" element={ <Garden /> } />
+      <Route path="*" element={<Navigate to={user ? "/home" : "/"} />} />
+    </Routes>
   );
 }
 
@@ -48,7 +28,17 @@ export default function App() {
   return (
     <AuthProvider>
       <Router>
-        <AppRoutes />
+        <div style={{
+          minHeight: '100vh',
+          width: '100vw',
+          display: 'flex',
+          flexDirection: 'column',
+          margin: 0,
+          padding: 0,
+          background: 'linear-gradient(145deg, #fff0f5 0%, #e6e6fa 100%)',
+        }}>
+          <AppRoutes />
+        </div>
       </Router>
     </AuthProvider>
   );

@@ -2,7 +2,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
 const config = require('./config');
-
+require('dotenv').config();
 // Define serialize and deserialize inside passport.js
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -18,9 +18,9 @@ passport.deserializeUser(async (id, done) => {
 });
 
 passport.use(new GoogleStrategy({
-    clientID: config.google.clientID,
-    clientSecret: config.google.clientSecret,
-    callbackURL: config.google.callbackURL
+    clientID: "703416968026-taanardsak8q6snjf0r02p7ts5an2v7g.apps.googleusercontent.com",
+    clientSecret: "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",
+    callbackURL: "/auth/google/callback"
   },
   async (accessToken, refreshToken, profile, done) => {
     try {

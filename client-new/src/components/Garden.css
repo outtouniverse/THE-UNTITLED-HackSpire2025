@@ -1,0 +1,331 @@
+.garden-container {
+  padding: 30px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 35px; /* Increased gap */
+  background: linear-gradient(135deg, #e0f2f7 0%, #d1e7e0 100%); /* Soft blue-green gradient */
+  min-height: calc(100vh - 60px); /* Adjust based on Navbar height if applicable */
+  position: relative;
+  overflow: hidden; /* Contain petals */
+  color: #335d50; /* Dark green text */
+}
+
+.garden-title {
+  font-family: 'Pacifico', cursive; /* Or another decorative font */
+  font-size: 2.8rem;
+  color: #2a5c4a; /* Darker green */
+  margin-bottom: 15px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Streak Cards --- */
+.streak-container {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin: 10px 0 20px 0;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 900px; /* Wider container */
+}
+
+.streak-card {
+  background: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+  backdrop-filter: blur(5px);
+  padding: 20px 30px;
+  border-radius: 18px; /* Rounded corners */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  min-width: 160px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.streak-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.streak-card h3 {
+  color: #387d67; /* Medium green */
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600; /* Bold heading */
+}
+
+.streak-card p {
+  color: #1b4b3a; /* Darker green */
+  font-size: 1.6rem;
+  margin: 0;
+  font-weight: bold;
+}
+
+/* --- Calendar Styling --- */
+.garden-calendar {
+  background: rgba(255, 255, 255, 0.7); /* Lighter transparent */
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  border: none; /* Remove default border */
+  margin: 0 auto;
+  max-width: 700px; /* Adjust width */
+  width: 95%;
+}
+
+/* Calendar Navigation */
+.react-calendar__navigation button {
+  color: #387d67;
+  min-width: 44px;
+  background: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+.react-calendar__navigation button:hover {
+  background-color: rgba(116, 193, 116, 0.2); /* Light green hover */
+}
+.react-calendar__navigation button:disabled {
+  background-color: transparent;
+  color: #a0c5b7; /* Lighter disabled color */
+}
+
+/* Weekday and Day Tiles */
+.react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none;
+  font-weight: 600;
+  color: #387d67;
+}
+
+.react-calendar__tile {
+  border-radius: 12px; /* Rounded tiles */
+  background: #f0fff4; /* Very light green */
+  margin: 4px; /* Spacing between tiles */
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid transparent;
+  height: 70px; /* Adjust height */
+  display: flex; /* Use flex for alignment */
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Align content to top */
+  padding-top: 5px; /* Padding for date number */
+  position: relative; /* For flower positioning */
+  overflow: hidden; /* Keep flowers inside */
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background: #c8e6c9; /* Light green hover/focus */
+  transform: scale(1.03);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.react-calendar__tile--now { /* Today's date */
+  background: #a5d6a7; /* Slightly darker green */
+  font-weight: bold;
+  color: #1b4b3a;
+}
+.react-calendar__tile--now:enabled:hover,
+.react-calendar__tile--now:enabled:focus {
+  background: #95c695;
+}
+
+.react-calendar__tile--active { /* Selected date */
+  background: #74c174 !important;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  background: #63b063 !important;
+}
+
+/* --- Flower Styling --- */
+.flower-cluster {
+  position: absolute; /* Position relative to tile */
+  bottom: 5px; /* Position at the bottom */
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end; /* Align flowers to the bottom */
+  height: 60%; /* Take up lower part of tile */
+  padding: 0 5px; /* Padding inside cluster */
+}
+
+.flower {
+  font-size: 20px; /* Adjust flower size */
+  margin: 0 1px; /* Small space between flowers */
+  display: inline-block;
+  animation: growFlower 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy grow */
+  transform-origin: bottom center;
+  transition: transform 0.3s ease;
+}
+
+.flower-cluster:hover .flower {
+  transform: scale(1.1) rotate(5deg); /* Slight grow/rotate on hover */
+}
+
+@keyframes growFlower {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* --- Mood Buttons --- */
+.mood-selection-area {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  width: 95%;
+  max-width: 700px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.mood-selection-area h2 {
+  color: #387d67;
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.3rem;
+}
+
+.mood-selection-area .selected-date-display {
+  font-weight: 600;
+  color: #1b4b3a;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.mood-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.plant-button {
+  background-color: #74c174; /* Primary green */
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  margin: 0; /* Remove margin, use gap */
+  border-radius: 20px; /* Pill shape */
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.plant-button:hover {
+  background-color: #58a158; /* Darker green */
+  transform: translateY(-3px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+}
+
+.plant-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Monthly Stats --- */
+.monthly-stats {
+  margin-top: 20px; /* Adjusted margin */
+  padding: 25px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(5px);
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  width: 95%;
+  max-width: 900px; /* Match streak container width */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.monthly-stats h2 {
+  color: #2a5c4a;
+  margin-bottom: 20px;
+  font-size: 1.6rem; /* Larger heading */
+  font-weight: 600;
+}
+/* Reuse streak-container and streak-card styles for monthly stats */
+.monthly-stats .streak-container {
+  margin-bottom: 0; /* Remove bottom margin inside monthly stats */
+}
+
+
+/* --- Falling Petals Animation --- */
+.falling-petals {
+  position: fixed; /* Changed to fixed to cover viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1; /* Behind everything */
+}
+
+.petal {
+  position: absolute;
+  top: -40px; /* Start above screen */
+  font-size: 20px; /* Petal size */
+  color: #ffb6c1; /* Light pink */
+  opacity: 0.7;
+  animation: fall linear infinite;
+  /* Use CSS variables for random properties */
+  --start-x: calc(5% + random() * 90%);
+  --end-x: calc(var(--start-x) + (random() * 100px - 50px)); /* Slight horizontal drift */
+  --fall-duration: calc(8s + random() * 7s); /* Random duration */
+  --rotation: calc(random() * 720deg - 360deg); /* Random rotation */
+  --delay: calc(random() * -15s); /* Negative delay to start some immediately */
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(0) translateX(var(--start-x)) rotate(0deg);
+    opacity: 0.7;
+  }
+  90% {
+    opacity: 0.5; /* Fade slightly before disappearing */
+  }
+  100% {
+    transform: translateY(105vh) translateX(var(--end-x)) rotate(var(--rotation));
+    opacity: 0;
+  }
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+  .garden-container { padding: 20px 10px; gap: 25px; }
+  .garden-title { font-size: 2.2rem; }
+  .streak-container { gap: 15px; }
+  .streak-card { padding: 15px 20px; min-width: 120px; }
+  .streak-card h3 { font-size: 1rem; }
+  .streak-card p { font-size: 1.4rem; }
+  .garden-calendar { padding: 15px; max-width: 100%; }
+  .react-calendar__tile { height: 60px; margin: 3px; }
+  .flower { font-size: 16px; }
+  .mood-selection-area { padding: 20px; }
+  .plant-button { padding: 8px 15px; font-size: 0.9rem; }
+  .monthly-stats h2 { font-size: 1.4rem; }
+}
+
+@media (max-width: 480px) {
+  .garden-title { font-size: 1.8rem; }
+  .streak-container { gap: 10px; }
+  .streak-card { padding: 10px 15px; min-width: 100px; }
+  .streak-card h3 { font-size: 0.9rem; }
+  .streak-card p { font-size: 1.2rem; }
+  .react-calendar__tile { height: 50px; margin: 2px; }
+  .flower { font-size: 14px; }
+  .mood-buttons { gap: 8px; }
+  .plant-button { padding: 7px 12px; font-size: 0.85rem; }
+  .monthly-stats { padding: 15px; }
+  .monthly-stats h2 { font-size: 1.2rem; }
+} 
