@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Emotional Guide Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .profile-picture {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        #chat-box { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; }
+        .user { color: blue; }
+        .bot { color: green; }
+        .tab { display: inline-block; padding: 10px; cursor: pointer; border: 1px solid #ccc; border-bottom: none; }
+        .tab.active { background: #eee; }
+        .tab-content { border: 1px solid #ccc; padding: 10px; }
+        .history-list { max-height: 300px; overflow-y: auto; }
+        .history-item { cursor: pointer; padding: 5px; border-bottom: 1px solid #eee; }
+        .history-item:hover { background: #f0f0f0; }
+        .timestamp { color: #888; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="welcome-message">
+            <h1>Welcome to Hackspire!</h1>
+        </div>
+        <div class="user-info">
+            <img id="profilePicture" class="profile-picture" src="" alt="Profile Picture">
+            <div>
+                <h2 id="displayName"></h2>
+                <p id="email"></p>
+            </div>
+        </div>
+        <a href="/auth/logout" class="logout-btn">Logout</a>
+        <div>
+            <span class="tab active" id="chatTab" onclick="showTab('chat')">Chat</span>
+            <span class="tab" id="historyTab" onclick="showTab('history')">History</span>
+        </div>
+        <div id="chat-content" class="tab-content">
+            <h2>How are you feeling today?</h2>
+            <label for="character">Choose your guide:</label>
+            <select id="character">
+                <option value="Sadie">Sadie (Sadness)</option>
+                <option value="Zest">Zest (Happiness)</option>
+                <option value="Pace">Pace (Anxiety)</option>
+                <option value="Blaze">Blaze (Anger)</option>
+                <option value="Nova">Nova (Loneliness)</option>
+            </select>
+            <button onclick="startChat()">Start Chat</button>
+            <div id="chat-section" style="display:none;">
+                <div id="chat-box"></div>
+                <input type="text" id="message" placeholder="Type your message..." />
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        <div id="history-content" class="tab-content" style="display:none;">
+            <h3>Your Chat History</h3>
+            <div class="history-list" id="history-list"></div>
+            <div id="history-detail" style="display:none;">
+                <h4>Chat Detail</h4>
+                <div id="history-messages" style="max-height:300px;overflow-y:auto;border:1px solid #ccc;padding:10px;"></div>
+                <button onclick="closeHistoryDetail()">Back to History</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch user information
+        fetch('/auth/current-user')
+            .then(response => response.json())
+            .then(data => {
+                if (data.user) {
+                    document.getElementById('displayName').textContent = data.user.displayName;
+                    document.getElementById('email').textContent = data.user.email;
+                    document.getElementById('profilePicture').src = data.user.profilePicture;
+                }
+            })
+            .catch(error => console.error('Error fetching user data:', error));
+
+        let chatId = null;
+        let historyTab = null;
+
+        function showTab(tab) {
+            document.getElementById('chatTab').classList.remove('active');
+            document.getElementById('historyTab').classList.remove('active');
+            document.getElementById('chat-content').style.display = 'none';
+            document.getElementById('history-content').style.display = 'none';
+            if (tab === 'chat') {
+                document.getElementById('chatTab').classList.add('active');
+                document.getElementById('chat-content').style.display = '';
+            } else {
+                document.getElementById('historyTab').classList.add('active');
+                document.getElementById('history-content').style.display = '';
+                loadHistory();
+            }
+        }
+
+        function startChat() {
+            const character = document.getElementById('character').value;
+            fetch('/chat/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ character })
+            })
+            .then(res => res.json())
+            .then(data => {
+                chatId = data.chatId;
+                document.getElementById('chat-section').style.display = 'block';
+                document.getElementById('chat-box').innerHTML = '';
+            });
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            if (!message.trim()) return;
+            fetch('/chat/message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chatId, message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML += `<div class="user"><b>You:</b> ${message}</div>`;
+                chatBox.innerHTML += `<div class="bot"><b>Bot:</b> ${data.bot}</div>`;
+                document.getElementById('message').value = '';
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        function loadHistory() {
+            fetch('/chat/history')
+                .then(res => res.json())
+                .then(chats => {
+                    const list = document.getElementById('history-list');
+                    list.innerHTML = '';
+                    chats.forEach(chat => {
+                        const started = new Date(chat.startedAt).toLocaleString();
+                        const preview = chat.messages && chat.messages.length > 0 ? chat.messages[0].text.slice(0, 40) + (chat.messages[0].text.length > 40 ? '...' : '') : '';
+                        const item = document.createElement('div');
+                        item.className = 'history-item';
+                        item.innerHTML = `<b>${chat.character}</b> <span class="timestamp">${started}</span><br><span>${preview}</span>`;
+                        item.onclick = () => showHistoryDetail(chat._id);
+                        list.appendChild(item);
+                    });
+                    document.getElementById('history-detail').style.display = 'none';
+                    list.style.display = '';
+                });
+        }
+
+        function showHistoryDetail(chatId) {
+            fetch(`/chat/history/${chatId}`)
+                .then(res => res.json())
+                .then(chat => {
+                    const messagesDiv = document.getElementById('history-messages');
+                    messagesDiv.innerHTML = '';
+                    chat.messages.forEach(msg => {
+                        const time = new Date(msg.timestamp).toLocaleString();
+                        messagesDiv.innerHTML += `
+                            <div class="${msg.sender}" style="margin-bottom:8px;">
+                                <b>${msg.sender === 'user' ? 'You' : 'Bot'}:</b>
+                                <span>${msg.text}</span>
+                                <span class="timestamp" style="float:right;">${time}</span>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('history-list').style.display = 'none';
+                    document.getElementById('history-detail').style.display = '';
+                });
+        }
+
+        function closeHistoryDetail() {
+            document.getElementById('history-detail').style.display = 'none';
+            document.getElementById('history-list').style.display = '';
+        }
+    </script>
+</body>
+</html>
