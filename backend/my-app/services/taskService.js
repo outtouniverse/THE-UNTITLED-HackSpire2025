@@ -9,6 +9,7 @@ You are an AI assistant that helps users uplift their mood.
 Based on the following conversation between a user and a virtual character, suggest one small positive action the user can take right now to feel better.
 
 The task should be:
+
 - Simple and achievable
 - Encouraging and positive
 - Written in a friendly tone
