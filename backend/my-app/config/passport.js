@@ -1,8 +1,10 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const User = require('../models/User');
-const config = require('./config');
-require('dotenv').config();
+// Remove config require if not used elsewhere for credentials
+// const config = require('./config');
+require('dotenv').config(); // Loads .env file variables
+
 // Define serialize and deserialize inside passport.js
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -18,9 +20,10 @@ passport.deserializeUser(async (id, done) => {
 });
 
 passport.use(new GoogleStrategy({
-    clientID: "703416968026-taanardsak8q6snjf0r02p7ts5an2v7g.apps.googleusercontent.com",
-    clientSecret: "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",
-    callbackURL: "/auth/google/callback"
+    // Read credentials from environment variables
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: "/auth/google/callback" // Keep this or use process.env.GOOGLE_CALLBACK_URL if needed
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
