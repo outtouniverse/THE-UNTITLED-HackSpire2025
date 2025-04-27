@@ -8,6 +8,7 @@ const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 const journalRoutes = require('./routes/journal');
+const taskRoutes = require('./routes/tasks');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -55,6 +56,9 @@ app.set('io', io);
 // Use the journal routes
 app.use(journalRoutes);
 app.use(analysisRoutes);
+
+// Mount the task routes
+app.use('/api/tasks', taskRoutes);
 
 // Socket connection
 io.on('connection', (socket) => {

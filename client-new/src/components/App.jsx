@@ -8,6 +8,7 @@ import JournalView from './JournalView';
 import AnalysisView from './AnalysisView';
 import Garden from './Garden';
 
+
 function AppRoutes() {
   const { user } = useAuth();
 
@@ -19,6 +20,7 @@ function AppRoutes() {
       <Route path="/journal" element={user ? <JournalView /> : <Navigate to="/" />} />
       <Route path="/analysis" element={ <AnalysisView /> } />
       <Route path="/garden" element={ <Garden /> } />
+      {/* <Route path="/generate-task" element={<TaskGeneratorPage />} /> */}
       <Route path="*" element={<Navigate to={user ? "/home" : "/"} />} />
     </Routes>
   );

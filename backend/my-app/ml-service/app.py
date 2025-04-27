@@ -85,7 +85,7 @@ ALLOWED topics:
 
 FORBIDDEN topics:
 - Random facts
-- Jokes unrelated to feelings
+- Trivia
 - External knowledge
 
 If unsure, redirect enthusiastically back to user's feelings.
@@ -209,7 +209,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Configure Gemini API key from environment variable
-genai.configure(api_key="AIzaSyBYkv9KPhVmX4Ro6VHGEh_tmepFKBj7uWo")
+genai.configure(api_key="AIzaSyBJCxG_0GduNhi45MTFXUiW_qnq7G4EOiY") # Use environment variable
 
 def print_menu():
     """Prints the character selection menu."""
@@ -336,22 +336,92 @@ def chat_api():
         return 'user' if sender == 'user' else 'model'
 
     # Compose the conversation history for the model
-    history = [{'role': sender_to_role(m['sender']), 'parts': [{'text': m['text']}]} for m in messages]
+    # Include only the last few messages if history is long to keep prompt size down
     # Add system instruction at the start
-    history.insert(0, {'role': 'user', 'parts': [{'text': character['system_instruction']}]})
+    history = [{'role': 'user', 'parts': [{'text': character['system_instruction']}]}]
+    history.extend([{'role': sender_to_role(m['sender']), 'parts': [{'text': m['text']}]} for m in messages[-10:]]) # Use last 10 messages
 
     try:
         model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest")
         chat = model.start_chat(history=history)
-        response = chat.send_message(messages[-1]['text'] if messages else "")
+        response = chat.send_message(messages[-1]['text'] if messages else "") # Send the last user message
         reply = response.text if response.text else "..."
         return jsonify({'reply': reply})
     except Exception as e:
+        print(f"Error in chat_api: {e}") # Log server-side
         return jsonify({'reply': f"Error: {str(e)}"}), 500
+
+@app.route('/suggest_task', methods=['POST'])
+def suggest_task_api():
+    """
+    Suggests a task based on the character (mood focus) and chat history.
+    Can suggest multiple tasks.
+    """
+    data = request.json
+    character_name = data.get('character')
+    messages = data.get('messages', []) # Expecting chat history
+    num_tasks = data.get('num_tasks', 1) # Get number of tasks, default to 1
+
+    # Find the character to get their mood focus
+    character = next((c for c in characters if c['name'] == character_name), None)
+    mood_focus = character['name'] if character else "general well-being"
+
+    if not messages:
+        # Return an array even for the default suggestion
+        return jsonify({'tasks': ["Based on your mood, perhaps take a few deep breaths."]}), 200
+
+    # Construct prompt for Gemini to suggest tasks
+    # Explicitly ask for the requested number of tasks in a numbered list format
+    prompt_text = f"Based on this conversation about {mood_focus} and the user's feelings, suggest {num_tasks} distinct, very short, actionable tasks (1-2 sentences each) the user can do right now. Focus on practical steps related to their mood. Do not include any conversational filler or character persona, just a numbered list of the tasks.\n\nConversation:\n"
+
+    # Add the relevant parts of the conversation history to the prompt
+    for msg in messages:
+        role = 'user' if msg['sender'] == 'user' else 'model'
+        prompt_text += f"{msg['sender']}: {msg['text']}\n"
+
+    prompt_messages = [{'role': 'user', 'parts': [{'text': prompt_text}]}]
+
+
+    try:
+        model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest")
+        # Use generate_content for a single prompt without chat history persistence
+        response = model.generate_content(prompt_messages)
+        raw_response_text = response.text if response.text else ""
+
+        # --- Parse the raw response text into a list of tasks ---
+        tasks = []
+        if raw_response_text:
+             # Simple parsing assuming a numbered list (e.g., "1. Task one\n2. Task two")
+             # This might need refinement based on actual Gemini output format
+             lines = raw_response_text.strip().split('\n')
+             for line in lines:
+                 # Check if the line starts with a number followed by a dot and space
+                 if line and line[0].isdigit() and line[1:2] == '. ':
+                      tasks.append(line[2:].strip()) # Add the task text after the number
+                 elif line.strip(): # Add lines that don't match numbered format as a fallback
+                      tasks.append(line.strip())
+
+        # If no tasks were parsed, provide a fallback
+        if not tasks:
+             tasks = ["Consider doing something kind for yourself."]
+
+        # Return an array of tasks
+        return jsonify({'tasks': tasks})
+
+    except Exception as e:
+        print(f"Error generating task suggestion: {e}") # Log server-side
+        # Return an array with an error message as the task
+        return jsonify({'tasks': [f"Could not generate tasks: {str(e)}"]}), 500
 
 if __name__ == "__main__":
     import sys
+    # Ensure API key is set for CLI mode if needed, otherwise relies on env var
+    # genai.configure(api_key=os.getenv("GEMINI_API_KEY", "YOUR_DEFAULT_API_KEY"))
     if len(sys.argv) > 1 and sys.argv[1] == "cli":
         main()
     else:
+        # Ensure API key is set for Flask app mode
+        if not os.getenv("GEMINI_API_KEY"):
+             print("Warning: GEMINI_API_KEY environment variable not set. Using default or hardcoded key.")
+             # You might want to exit or handle this more robustly
         app.run(host="0.0.0.0", port=5000, debug=True)

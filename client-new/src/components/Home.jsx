@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext'; // Assuming AuthContext provides user and logout
 // Optional: Import icons (e.g., from react-icons)
-// import { FiUserPlus, FiEdit3, FiFeather, FiBox } from 'react-icons/fi';
+// import { FiUserPlus, FiEdit3, FiFeather, FiBox, FiLock } from 'react-icons/fi';
 
 export default function Home() {
   const { user, logout } = useAuth(); // Get user and logout function
@@ -166,15 +166,15 @@ export default function Home() {
       // Override base style to push content to the top
       justifyContent: 'flex-start', // Changed from flex-end
     },
-    comingSoon: {
+    tasks: { // Renamed from comingSoon
       // ...blockBaseStyle,
-      backgroundColor: '#00203050', // Light Grey
+      backgroundColor: '#343a40', // Darker grey background
       gridArea: '2 / 2 / 3 / 4', // Span 2 columns on row 2
-      color: '#6c757d', // Dark grey text
-      border:'1px solid #222',
+      color: '#adb5bd', // Lighter grey text for contrast
+      border:'1px solid #495057', // Slightly lighter border
       cursor: 'not-allowed',
-      alignItems: 'center', // Center placeholder text horizontally
-      justifyContent: 'center', // Center placeholder text vertically
+      alignItems: 'flex-start', // Align content to top-left
+      justifyContent: 'flex-start', // Align content to top
     },
   };
 
@@ -204,6 +204,45 @@ export default function Home() {
       alignSelf: 'flex-start', // Keep icon top-left aligned generally
    };
 
+   // Styles for the Task Block
+   const taskListStyle = {
+       marginTop: '20px', // Space below title/subtitle
+       width: '100%',
+       opacity: 0.6, // Make the list look disabled/faded
+   };
+
+   const taskItemStyle = {
+       backgroundColor: 'rgba(255, 255, 255, 0.05)', // Very subtle background
+       padding: '8px 12px',
+       borderRadius: '6px',
+       marginBottom: '8px',
+       fontSize: '0.9rem',
+       color: '#ced4da', // Lighter grey text for tasks
+       display: 'flex',
+       alignItems: 'center',
+       fontFamily: "'Inter', sans-serif",
+   };
+
+   const lockIconStyle = {
+       marginRight: '8px',
+       fontSize: '1rem',
+       color: '#6c757d', // Darker grey for lock icon
+   };
+
+   const comingSoonTagStyle = {
+       position: 'absolute',
+       top: '15px',
+       right: '15px',
+       backgroundColor: '#ffc107', // Yellow background
+       color: '#343a40', // Dark text
+       padding: '3px 8px',
+       borderRadius: '12px', // Pill shape
+       fontSize: '0.75rem',
+       fontWeight: 600,
+       zIndex: 3, // Above other content
+       fontFamily: "'Inter', sans-serif",
+   };
+
 
   // --- Event Handlers ---
   const handleLogout = async () => {
@@ -216,7 +255,7 @@ export default function Home() {
     }
   };
 
-  // Helper for hover effects
+  // Helper for hover effects (only for interactive blocks)
   const applyHover = (e) => Object.assign(e.currentTarget.style, blockHoverStyle);
   const removeHover = (e) => {
       // Reset only hover-specific styles
@@ -294,16 +333,35 @@ export default function Home() {
              </div>
         </Link>
 
-        {/* Block 4: Coming Soon */}
-        {/* Uses blockStyles.comingSoon (justifyContent: center, alignItems: center) -> text centered */}
-        <div style={{...blockBaseStyle, ...blockStyles.comingSoon}}>
-             {/* No overlay needed for light background? Or add one if desired */}
-             {/* <div style={overlayStyle}></div> */}
-             {/* Optional Icon: <FiBox style={{...blockIconStyle, alignSelf: 'center'}} /> */}
-             <div> {/* This div contains the text */}
-                 <h3 style={{...blockTitleStyle, color: blockStyles.comingSoon.color || '#ffffff'}}>Coming Soon</h3>
-                 <p style={{...blockSubtitleStyle, color: blockStyles.comingSoon.color || '#ffffff', opacity: 0.8}}>More features are planned!</p>
+        {/* Block 4: Tasks (Coming Soon) */}
+        {/* Uses blockStyles.tasks (justifyContent: flex-start, alignItems: flex-start) -> content at top */}
+        <div style={{...blockBaseStyle, ...blockStyles.tasks}}>
+             {/* No overlay needed for dark background */}
+             <span style={comingSoonTagStyle}>COMING SOON</span>
+             {/* Optional Icon: <FiLock style={{...blockIconStyle, alignSelf: 'flex-start', color: '#6c757d'}} /> */}
+             <div> {/* This div contains the text and task list */}
+                 <h3 style={{...blockTitleStyle, color: '#e9ecef', textShadow: 'none'}}>Tasks</h3>
+                 <p style={{...blockSubtitleStyle, color: '#adb5bd', textShadow: 'none', opacity: 0.8}}>Organize your day</p>
+
+                 {/* Placeholder Locked Task List */}
+                 <div style={taskListStyle}>
+                     <div style={taskItemStyle}>
+                         <span style={lockIconStyle}>🔒</span> {/* Lock Icon */}
+                         <span>Plan project steps</span>
+                     </div>
+                     <div style={taskItemStyle}>
+                         <span style={lockIconStyle}>🔒</span> {/* Lock Icon */}
+                         <span>Schedule team meeting</span>
+                     </div>
+                     <div style={taskItemStyle}>
+                         <span style={lockIconStyle}>🔒</span> {/* Lock Icon */}
+                         <span>Review feedback</span>
+                     </div>
+                 </div>
              </div>
+             {/* Empty div to push content up because of justifyContent: 'space-between' in base */}
+             {/* Or change justifyContent in blockStyles.tasks to 'flex-start' */}
+             {/* <div></div>  <-- Removed as justifyContent is now flex-start */}
         </div>
       </div>
 

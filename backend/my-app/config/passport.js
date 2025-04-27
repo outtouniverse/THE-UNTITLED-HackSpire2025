@@ -20,10 +20,13 @@ passport.deserializeUser(async (id, done) => {
 });
 
 passport.use(new GoogleStrategy({
-    // Read credentials from environment variables
+    
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: "/auth/google/callback" // Keep this or use process.env.GOOGLE_CALLBACK_URL if needed
+    // clientID: "703416968026-taanardsak8q6snjf0r02p7ts5an2v7g.apps.googleusercontent.com",
+    // clientSecret:"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",
+    // callbackURL: "http://localhost:3001/auth/google/callback"
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
